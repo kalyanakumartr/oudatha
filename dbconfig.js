@@ -4,15 +4,15 @@ doenv.config({
     path:"./.env",
 });
 var connections=mysql.createConnection({
-    // host:'localhost',
-    // user:'root',
-    // password:'password',
-    // database:'stashook'
+    host:'localhost',
+    user:'root',
+    password:'password',
+    database:'oudatha'
 
-    host:process.env.DATABASE_HOST,
-    user:process.env.DATABASE_USER,
-    password:process.env.DATABASE_PASSWORD,
-    database:process.env.DATABASE
+    // host:process.env.DATABASE_HOST,
+    // user:process.env.DATABASE_USER,
+    // password:process.env.DATABASE_PASSWORD,
+    // database:process.env.DATABASE
 });
 connections.connect(function(err)
 {
