@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var sprintf = require('sprintf-js').sprintf;
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const con = require('../dbconfig');
 
 const jsonwebtoken = require('jsonwebtoken');
@@ -124,6 +124,8 @@ router.get('/getcategory/:catid', function (req, res) {
 });
 
 
+
+
 // authloginwithtoken
 // medile ware create
 const authlogin = (req, res, next) => {
@@ -141,6 +143,22 @@ const authlogin = (req, res, next) => {
 
   })
 }
+
+router.get('/getcategory',authlogin ,function (req, res, next) {
+  // res.send('respond with a resource');
+
+  var getresisterQ = "SELECT * FROM category"
+
+  con.query(getresisterQ, function (error, result) {
+    if (error) {
+      console.log(error);
+      res.send("Unable to get data");
+    }
+    else {
+      res.send(result);
+    }
+  });
+});
 
 //getcategoryname
 router.get('/getcategoryname/:searchname', function (req, res, next) {
@@ -179,16 +197,34 @@ router.get('/getcategory', authlogin, function (req, res) {
 
 
 //get appoinement
-router.get('/getappointment', authlogin, (req, res) => {
-  var getapp = "SELECT appointment.appDrId,das.drAppDate,user.username ,user.gender FROM userrolemap urm ,appointment,user ,doctorappointmentslot das WHERE user.id= urm.userId AND urm.roleId=2 AND user.id=appointment.appPatientId AND appointment.appSlotId=das.slotId AND appointment.appDrId= " + req.query.appDrId + " AND das.drAppDate='" + req.query.drAppDate + "'";
-  con.query(getapp, function (error, result) {
+// router.get('/getappointment', authlogin, (req, res) => {
+//   var getapp = "SELECT appointment.appDrId,das.drAppDate,user.username ,user.gender FROM userrolemap urm ,appointment,user ,doctorappointmentslot das WHERE user.id= urm.userId AND urm.roleId=2 AND user.id=appointment.appPatientId AND appointment.appSlotId=das.slotId AND appointment.appDrId= " + req.query.appDrId + " AND das.drAppDate='" + req.query.drAppDate + "'";
+//   con.query(getapp, function (error, result) {
+//     if (error) {
+//       console.log(error)
+//       res.send("Unable to get data");
+//     }
+//     else {
+//       console.log("Getapp", getapp);
+//       console.log("resu", result);
+//       res.send(result);
+//     }
+//   });
+// });
+
+router.get('/getappointment', authlogin,function (req, res) {
+  // var getapp = "SELECT u.username,app.appDrId, dps.drAppDate FROM appointment app,doctorappointmentslot dps, user u WHERE u.id=dps.slotId AND appDrId= AND drAppDate=" +req.query.appDrId + req.query.drAppDate;
+  // var getappold="SELECT appointment.appDrId,doctorappointmentslot.drAppDate,user.username FROM appointment INNER JOIN doctorappointmentslot ON appointment.appSlotId=doctorappointmentslot.slotid INNER JOIN user ON appointment.appDrId=user.id WHERE appointment.appDrId=" +req.query.appDrId +" AND doctorappointmentslot.drAppDate='"+req.query.drAppDate+"'";
+    var getapp="SELECT appointment.appDrId,appointment.id,appointment.appStatusId,das.drAppDate,das.slot,user.username,user.gender FROM userrolemap urm ,appointment,user ,doctorappointmentslot das WHERE user.id= urm.userId AND urm.roleId=2 AND user.id=appointment.appPatientId AND appointment.appSlotId=das.slotId AND appointment.appDrId= " +req.query.appDrId +" AND das.drAppDate='"+req.query.drAppDate+"'";
+    con.query(getapp, function (error, result) {
     if (error) {
+      
       console.log(error)
       res.send("Unable to get data");
     }
     else {
-      console.log("Getapp", getapp);
-      console.log("resu", result);
+      console.log(getapp);
+      console.log(result);
       res.send(result);
     }
   });
@@ -219,7 +255,7 @@ router.get('/getuser', authlogin, function (req, res) {
 //doctorcategorymap
 router.get('/doctorcategorymap', authlogin, function (req, res) {
   try {
-    var getresisterQ = "SELECT  u.username as DocName,u.gender,u.email ,u.id ,dcm.categoryId,dcm.docexpreience,dcm.drDesignation ,cat.categories FROM category cat, doctorcategorymap dcm, user u  WHERE dcm.userId=u.id AND cat.catid=dcm.categoryId"
+    var getresisterQ = "SELECT  u.username as DocName,u.gender,u.email ,u.id as DocId,dcm.categoryId,dcm.docexpreience,dcm.drDesignation ,cat.categories FROM category cat, doctorcategorymap dcm, user u  WHERE dcm.userId=u.id AND cat.catid=dcm.categoryId"
     con.query(getresisterQ, function (error, result) {
       if (error) {
         console.log(error);
@@ -559,12 +595,12 @@ router.post('/adduser', (req, res) => {
   con.query("select count(email) count from user where email=?", [req.body.email], async (error, result) => {
     console.log("Error", error, result[0].count);
     if (result[0].count > 0) {
-      res.send({ status: true, message: "Alreadty email id exist give correct email id " })
+      res.send({ status: true, message: "Already email id exist give correct email id " })
       return;
     }
     else {
       let hashedPassword = await bcrypt.hash(req.body.password, 8);
-      var command = sprintf('INSERT INTO user (username, password,gender,email,phonenumber,url,status) VALUES ("%s", "%s","%s","%s","%s","%s",%b);', req.body.username, hashedPassword, req.body.gender, req.body.email, req.body.phonenumber, req.body.url, 1);
+      var command = sprintf('INSERT INTO user (username, password,gender,email,phonenumber,imageUrl,status) VALUES ("%s", "%s","%s","%s","%s","%s",%b);', req.body.username, hashedPassword, req.body.gender, req.body.email, req.body.phonenumber, req.body.imageUrl, 1);
       con.query(command, function (err, mysqlres1) {
         if (err) throw err;
         id = mysqlres1.insertId
@@ -606,7 +642,7 @@ router.post('/adduserwithlogin', authlogin, (req, res) => {
     }
     else {
       let hashedPassword = await bcrypt.hash(req.body.password, 8);
-      var command = sprintf('INSERT INTO user (username, password,gender,email,phonenumber,url,status) VALUES ("%s", "%s","%s","%s","%s","%s",%b);', req.body.username, hashedPassword, req.body.gender, req.body.email, req.body.phonenumber, req.body.url, 1);
+      var command = sprintf('INSERT INTO user (username, password,gender,email,phonenumber,imageUrl,status) VALUES ("%s", "%s","%s","%s","%s","%s",%b);', req.body.username, hashedPassword, req.body.gender, req.body.email, req.body.phonenumber, req.body.imageUrl, 1);
       con.query(command, function (err, mysqlres1) {
         if (err) throw err;
         id = mysqlres1.insertId
@@ -967,32 +1003,55 @@ router.post('/patientAppointmentCancel/:id', authlogin, (req, res) => {
 
 
 
-router.get('/getdoctorslot', authlogin, function (req, res, next) {
-  var getresisterQ = "SELECT *,false as booked FROM doctorappointmentslot WHERE appDrId =" + req.query.appDrId + " AND drAppDate='" + req.query.drAppDate + "'";
+// router.get('/getdoctorslot', authlogin, function (req, res, next) {
+//   var getresisterQ = "SELECT *,false as booked FROM doctorappointmentslot WHERE appDrId =" + req.query.appDrId + " AND drAppDate='" + req.query.drAppDate + "'";
 
+//   con.query(getresisterQ, function (error, result) {
+//     if (error) {
+//       console.log(error);
+//       res.send("Unable to get data1");
+//     }
+//     else {
+//       var getothertabel = "SELECT GROUP_CONCAT( appSlotId) as slotId FROM appointment app WHERE app.appDrId=" + req.query.appDrId + " AND app.appSlotId IN (SELECT slotId FROM doctorappointmentslot WHERE appDrId=" + req.query.appDrId + " AND drAppDate='" + req.query.drAppDate + "')";
+//       con.query(getothertabel, function (errorInside, resultInside) {
+//         if (errorInside) {
+//           console.log(errorInside);
+//           res.send("Unable to get data2");
+//         }
+//         else {
+//           console.log(result, resultInside);
+//           res.send({ "Slots": result, "BookedSlots": resultInside });
+//         }
+//       });
+//     }
+//   });
+//   next(err);
+// });
+
+router.get('/getdoctorslot',authlogin,function(req,res){
+  var getresisterQ = "SELECT *,false as booked FROM doctorappointmentslot WHERE appDrId =" + req.query.appDrId+ " AND drAppDate='"+req.query.drAppDate+"'";
+  //console.log(getresisterQ);
   con.query(getresisterQ, function (error, result) {
     if (error) {
       console.log(error);
       res.send("Unable to get data1");
     }
     else {
-      var getothertabel = "SELECT GROUP_CONCAT( appSlotId) as slotId FROM appointment app WHERE app.appDrId=" + req.query.appDrId + " AND app.appSlotId IN (SELECT slotId FROM doctorappointmentslot WHERE appDrId=" + req.query.appDrId + " AND drAppDate='" + req.query.drAppDate + "')";
-      con.query(getothertabel, function (errorInside, resultInside) {
-        if (errorInside) {
-          console.log(errorInside);
-          res.send("Unable to get data2");
-        }
-        else {
-          console.log(result, resultInside);
-          res.send({ "Slots": result, "BookedSlots": resultInside });
-        }
-      });
-    }
-  });
-  next(err);
+    //  var soltId=
+      // var getothertabel="SELECT appSlotId FROM appointment app WHERE app.appDrId =" + req.body.drId+ " AND app.appSlotId IN ("+req.body.drAppDate+")";
+      var getothertabel="SELECT GROUP_CONCAT( appSlotId) as slotId FROM appointment app WHERE app.appDrId = " + req.query.appDrId+ " AND app.appSlotId IN (SELECT slotId FROM doctorappointmentslot WHERE appDrId =" + req.query.appDrId+ " AND drAppDate='"+req.query.drAppDate+"')";
+      //console.log(getothertabel);
+con.query(getothertabel,function(errorInside,resultInside){
+if (errorInside) {
+  console.log(errorInside);
+  res.send("Unable to get data2");
+}
+else {
+console.log(result,resultInside);
+      res.send({"Slots": result,"BookedSlots":resultInside});
+    }   });
+}  });
 });
-
-
 
 //insert slot
 router.post('/doctorslot', authlogin, (req, res) => {
