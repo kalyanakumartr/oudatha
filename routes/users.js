@@ -144,21 +144,21 @@ const authlogin = (req, res, next) => {
   })
 }
 
-router.get('/getcategory',authlogin ,function (req, res, next) {
-  // res.send('respond with a resource');
+// router.get('/getcategory',authlogin ,function (req, res, next) {
+//   // res.send('respond with a resource');
 
-  var getresisterQ = "SELECT * FROM category"
+//   var getresisterQ = "SELECT * FROM category"
 
-  con.query(getresisterQ, function (error, result) {
-    if (error) {
-      console.log(error);
-      res.send("Unable to get data");
-    }
-    else {
-      res.send(result);
-    }
-  });
-});
+//   con.query(getresisterQ, function (error, result) {
+//     if (error) {
+//       console.log(error);
+//       res.send("Unable to get data");
+//     }
+//     else {
+//       res.send(result);
+//     }
+//   });
+// });
 
 //getcategoryname
 router.get('/getcategoryname/:searchname', function (req, res, next) {
@@ -177,7 +177,7 @@ router.get('/getcategoryname/:searchname', function (req, res, next) {
 //get categeroies
 router.get('/getcategory', authlogin, function (req, res) {
   try {
-    var getresisterQ = "SELECT y * FROM category"
+    var getresisterQ = "SELECT * FROM category"
     con.query(getresisterQ, function (error, result) {
 
       if (error) {
@@ -637,7 +637,7 @@ router.post('/adduserwithlogin', authlogin, (req, res) => {
   con.query("select count(email) count from user where email=?", [req.body.email], async (error, result) => {
     console.log("Error", error, result[0].count);
     if (result[0].count > 0) {
-      res.send({ status: true, message: "Alreadty email id exist give correct email id " })
+      res.send({ status: true, message: "Already email id exist give correct email id " })
       return;
     }
     else {
@@ -777,13 +777,18 @@ router.post('/auth', async function (request, response) {
               // console.log("token", accesstoken);
               var type = '';
               if (results[0].roleId == 3) {
+                
                 type = "Admin"
+                
                 response.status(200).send({ accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
                 response.end();
               }
               else if (results[0].roleId == 1) {
+               
                 type = "Doctor"
-                response.status(200).send({ accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
+                var appoiid = 0;
+                var statusId = 0;
+                response.status(200).send({ appId: appoiid, stsId: statusId,accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
                 response.end();
               }
               else {
@@ -823,6 +828,8 @@ router.post('/auth', async function (request, response) {
     response.end();
   }
 });
+
+
 
 
 //get user doctor
@@ -916,9 +923,34 @@ router.post('/doctorAppointmentUpdate/:id', (req, res) => {
   });
 
 });
+// //Doctor Review Pending
+// router.post('/doctorreviewpending/:id', (req, res) => {
+//   var id = req.params.id;
+//   // var dr = req.body.drPrescription;
+//   // var followUpDate = req.body.followUpDate;
+//   // var patientReport = req.body.patientReport;
+//   // var appStatusId = req.body.appStatusId;
+
+//   var command = 'UPDATE appointment SET  appStatusId=4 WHERE id = ' + id + '';
+//   let data = [true, 1];
+//   con.query(command, data, function (error, result) {
+//     if (error) {
+//       res.send({ status: false, message: error });
+
+//       console.log(error);
+//       throw error;
+//     }
+//     else {
+//       console.log("re" + result)
+//       res.status(200).send("Successfully Doctor Review Update");
+//     }
+//   });
+
+// });
+
 //Doctor Review Pending
-router.post('/doctorreviewpending/:id', (req, res) => {
-  var id = req.params.id;
+router.post('/doctorreviewpending', (req, res) => {
+  var id = req.body.id;
   // var dr = req.body.drPrescription;
   // var followUpDate = req.body.followUpDate;
   // var patientReport = req.body.patientReport;
