@@ -255,7 +255,8 @@ router.get('/getuser', authlogin, function (req, res) {
 //doctorcategorymap
 router.get('/doctorcategorymap', authlogin, function (req, res) {
   try {
-    var getresisterQ = "SELECT  u.username as DocName,u.gender,u.email ,u.id as DocId,dcm.categoryId,dcm.docexpreience,dcm.drDesignation ,cat.categories FROM category cat, doctorcategorymap dcm, user u  WHERE dcm.userId=u.id AND cat.catid=dcm.categoryId"
+    // var getresisterQ = "SELECT  u.username as DocName,u.gender,u.email ,u.id as DocId,dcm.categoryId,dcm.docexpreience,dcm.drDesignation ,cat.categories FROM category cat, doctorcategorymap dcm, user u  WHERE dcm.userId=u.id AND cat.catid=dcm.categoryId"
+    var getresisterQ = "SELECT  u.username as DocName,u.gender,u.email ,u.id as DocId,dcm.categoryId,dcm.docexpreience,dcm.drDesignation ,cat.categories ,u.rating FROM category cat, doctorcategorymap dcm, user u  WHERE dcm.userId=u.id AND cat.catid=dcm.categoryId ORDER BY u.rating desc "
     con.query(getresisterQ, function (error, result) {
       if (error) {
         console.log(error);
@@ -766,7 +767,7 @@ router.post('/auth', async function (request, response) {
    con.query('SELECT *FROM user,userrolemap WHERE id=userId AND username = ?  ', [request.body.username], function (error, results) {
       if (results.length > 0) {
         // console.log("Error", error, results[0]);
-        console.log("Error", error);
+        // console.log("Error", error);
         // console.log(results, "check", results[0].password);
         bcrypt
           .compare(request.body.password, results[0].password)
