@@ -6,7 +6,7 @@ const con = require('../dbconfig');
 
 const jsonwebtoken = require('jsonwebtoken');
 const fs = require('fs');
-const jimp=require('jimp');
+const jimp = require('jimp');
 const multer = require('multer');
 const path = require('path');
 // // const nodemailer =require('nodemailer');
@@ -75,7 +75,7 @@ const path = require('path');
 //       res.json(info)
 //     });
 //   });
-  
+
 //   router.get('/email/smtp/template', (req, res, next) => {
 //     MailConfig.ViewOption(smtpTransport,hbs);
 //     let HelperOptions = {
@@ -103,9 +103,9 @@ const path = require('path');
 //           });
 //         }
 //     })
-    
+
 //   });
-  
+
 
 //End mail 
 //get categeroies with id
@@ -129,7 +129,12 @@ router.get('/getcategory/:catid', function (req, res) {
 // authloginwithtoken
 // medile ware create
 const authlogin = (req, res, next) => {
-  headers = { 'Content-Type': 'application/json' };
+  headers = {
+    'Content-Type': 'application/json',
+    // "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Origin": ['http://localhost:3002' , 'https://192.168.0.6:3002', 'http://127.0.0.1:3002'],
+    "Access-Control-Allow-Credentials": true
+  };
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(" ")[1];
   if (!token) return res.sendStatus(401);
@@ -212,13 +217,13 @@ router.get('/getcategory', authlogin, function (req, res) {
 //   });
 // });
 
-router.get('/getappointment', authlogin,function (req, res) {
+router.get('/getappointment', authlogin, function (req, res) {
   // var getapp = "SELECT u.username,app.appDrId, dps.drAppDate FROM appointment app,doctorappointmentslot dps, user u WHERE u.id=dps.slotId AND appDrId= AND drAppDate=" +req.query.appDrId + req.query.drAppDate;
   // var getappold="SELECT appointment.appDrId,doctorappointmentslot.drAppDate,user.username FROM appointment INNER JOIN doctorappointmentslot ON appointment.appSlotId=doctorappointmentslot.slotid INNER JOIN user ON appointment.appDrId=user.id WHERE appointment.appDrId=" +req.query.appDrId +" AND doctorappointmentslot.drAppDate='"+req.query.drAppDate+"'";
-    var getapp="SELECT appointment.appDrId,appointment.id,appointment.appStatusId,das.drAppDate,das.slot,user.username,user.gender FROM userrolemap urm ,appointment,user ,doctorappointmentslot das WHERE user.id= urm.userId AND urm.roleId=2 AND user.id=appointment.appPatientId AND appointment.appSlotId=das.slotId AND appointment.appDrId= " +req.query.appDrId +" AND das.drAppDate='"+req.query.drAppDate+"'";
-    con.query(getapp, function (error, result) {
+  var getapp = "SELECT appointment.appDrId,appointment.id,appointment.appStatusId,das.drAppDate,das.slot,user.username,user.gender FROM userrolemap urm ,appointment,user ,doctorappointmentslot das WHERE user.id= urm.userId AND urm.roleId=2 AND user.id=appointment.appPatientId AND appointment.appSlotId=das.slotId AND appointment.appDrId= " + req.query.appDrId + " AND das.drAppDate='" + req.query.drAppDate + "'";
+  con.query(getapp, function (error, result) {
     if (error) {
-      
+
       console.log(error)
       res.send("Unable to get data");
     }
@@ -282,7 +287,7 @@ router.get('/doctorcategorymap', authlogin, function (req, res) {
 
 //get doctorby category
 router.get('/getDoctorByCategory', authlogin, function (req, res, next) {
-  var getresisterQ = "SELECT u.username as DocName,dcm.docexpreience,dcm.doccertificatenum,dcm.categoryId, dcm.drDesignation,dcm.userId as DocId,cat.categories FROM category cat,doctorcategorymap dcm, user u WHERE cat.catid=dcm.categoryId AND dcm.userId= u.id AND dcm.categoryId=" + req.query.categoryId;
+  var getresisterQ = "SELECT u.username as DocName,dcm.docexpreience,dcm.doccertificatenum,dcm.categoryId, dcm.drDesignation,dcm.userId as DocId,cat.categories,u.rating as Rating FROM category cat,doctorcategorymap dcm, user u WHERE cat.catid=dcm.categoryId AND dcm.userId= u.id AND dcm.categoryId=" + req.query.categoryId;
   con.query(getresisterQ, function (error, result) {
     if (error) {
       console.log(error);
@@ -489,10 +494,10 @@ router.get('/getuserimagefromlocal', function (req, res) {
       const imagefile = fs.readFileSync('C:/images/' + result[0].imageUrl);
       const bl = Buffer.from(imagefile, 'image/jpeg');
       res.contentType('image/jpeg');
-      
+
       res.send(bl);
       res.end();
-      
+
 
     }
   });
@@ -530,25 +535,25 @@ router.get('/getuserimage', function (req, res) {
 //*** END  */
 
 //St doc desi
-router.get('/doctordetail',function(req,res){
+router.get('/doctordetail', function (req, res) {
   // var cmdd=('select * from user');
-var cmdd='select u.userName,app.appDrId,(SELECT drAppDate FROM doctorappointmentslot WHERE slotId=app.appslotid )as appointmentDate,(SELECT slot FROM doctorappointmentslot WHERE slotId=app.appslotid )as slot, (SELECT drDesignation FROM doctorcategorymap WHERE userId=u.id) AS designation from user u, appointment app where app.appDrId=u.id AND app.id='+ req.query.id;
-console.log(cmdd);
-con.query(cmdd,function(err,result){
-  console.log("result",result);
-  if(err){
-    console.log(err);
-  }
-  else{
-    res.send(result);
-  }
+  var cmdd = 'select u.userName,app.appDrId,(SELECT drAppDate FROM doctorappointmentslot WHERE slotId=app.appslotid )as appointmentDate,(SELECT slot FROM doctorappointmentslot WHERE slotId=app.appslotid )as slot, (SELECT drDesignation FROM doctorcategorymap WHERE userId=u.id) AS designation from user u, appointment app where app.appDrId=u.id AND app.id=' + req.query.id;
+  console.log(cmdd);
+  con.query(cmdd, function (err, result) {
+    console.log("result", result);
+    if (err) {
+      console.log(err);
+    }
+    else {
+      res.send(result);
+    }
 
-})
+  })
 }
 );
 //end doc desi
 //rating post
-router.post('/rating', authlogin ,(req, res) => {
+router.post('/rating', authlogin, (req, res) => {
   try {
     // console.log(req.body);
     var cmd = sprintf('SELECT appDrId FROM appointment  WHERE appointment.id=' + req.body.appId);
@@ -570,18 +575,18 @@ router.post('/rating', authlogin ,(req, res) => {
           // console.log("update", command);
           con.query(command, function (err, rating) {
             if (err) throw err;
-            var appstupdate=sprintf('update appointment SET  appStatusId=7 WHERE appointment.id=' + req.body.appId);
-            
+            var appstupdate = sprintf('update appointment SET  appStatusId=7 WHERE appointment.id=' + req.body.appId);
+
             con.query(appstupdate, function (err, sel) {
-              if(err)
-            { res.send({ status: false, message: err }); }
-                        else { res.status(200).send("Rating added Successfully in rating and user table"); }
-          });
+              if (err) { res.send({ status: false, message: err }); }
+              else { res.status(200).send("Rating added Successfully in rating and user table"); }
+            });
+          })
         })
       })
-    })
+    }
+    )
   }
-)}
   catch (e) {
     const statusCode = e.statusCoderes || 500;
     res.status(statusCode, "Error").json({ success: False, Error: e.message, ErrorCode: statusCode });
@@ -718,7 +723,7 @@ router.post('/adduserwithlogin', authlogin, (req, res) => {
 //                   comm = "SELECT * FROM appointment app WHERE app.appPatientId=" + results[0].userId + " AND appStatusId=4";
 //                   con.query(comm, function (req, res) {
 //                                         if (res.length > 0) {
-                      
+
 //                       appoiid = res[0].id;
 //                       console.log("appid",appoiid);
 //                       statusId = res[0].appStatusId;
@@ -732,7 +737,7 @@ router.post('/adduserwithlogin', authlogin, (req, res) => {
 
 //                   );
 //                 }
-              
+
 //               }
 //               response.status(200).send({ appId: appoiid, stsId: statusId, accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
 //               // response.status(20 0).send({ accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
@@ -764,7 +769,7 @@ router.post('/auth', async function (request, response) {
   let username = request.body.username;
   let password = request.body.password;
   if (username && password) {
-   con.query('SELECT *FROM user,userrolemap WHERE id=userId AND username = ?  ', [request.body.username], function (error, results) {
+    con.query('SELECT *FROM user,userrolemap WHERE id=userId AND username = ?  ', [request.body.username], function (error, results) {
       if (results.length > 0) {
         // console.log("Error", error, results[0]);
         // console.log("Error", error);
@@ -778,45 +783,46 @@ router.post('/auth', async function (request, response) {
               // console.log("token", accesstoken);
               var type = '';
               if (results[0].roleId == 3) {
-                
+
                 type = "Admin"
-                
+
                 response.status(200).send({ accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
                 response.end();
               }
               else if (results[0].roleId == 1) {
-               
+
                 type = "Doctor"
                 var appoiid = 0;
                 var statusId = 0;
-                response.status(200).send({ appId: appoiid, stsId: statusId,accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
+                response.status(200).send({ appId: appoiid, stsId: statusId, accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
                 response.end();
               }
               else {
                 type = "Patient"
-                            if (type == "Patient") {
-                comm = "SELECT * FROM appointment app WHERE app.appPatientId=" + results[0].userId + " AND appStatusId=4";
+                if (type == "Patient") {
+                  comm = "SELECT * FROM appointment app WHERE app.appPatientId=" + results[0].userId + " AND appStatusId=4";
                   con.query(comm, function (req, res) {
                     var appoiid = 0;
                     var statusId = 0;
-                                        if(res.length>0){
-                    appoiid = res[0].id;
-                    statusId = res[0].appStatusId;
+                    if (res.length > 0) {
+                      appoiid = res[0].id;
+                      statusId = res[0].appStatusId;
                     }
                     // else{}
                     response.status(200).send({ appId: appoiid, stsId: statusId, accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
-                     response.end();
+                    response.end();
                   }
-                  );}                              }
-                  //
-                          }
-                          else
-                          {
-                            response.status(401).send('Incorrect Username and/or Password!');
-                             response.end();
+                  );
+                }
+              }
+              //
+            }
+            else {
+              response.status(401).send('Incorrect Username and/or Password!');
+              response.end();
             }
             //  response.end();
-                      })
+          })
           .catch(err => console.error(err.message))
       } else {
         response.status(401).send('Incorrect Username and/or Password!');
@@ -1061,8 +1067,8 @@ router.post('/patientAppointmentCancel/:id', authlogin, (req, res) => {
 //   next(err);
 // });
 
-router.get('/getdoctorslot',authlogin,function(req,res){
-  var getresisterQ = "SELECT *,false as booked FROM doctorappointmentslot WHERE appDrId =" + req.query.appDrId+ " AND drAppDate='"+req.query.drAppDate+"'";
+router.get('/getdoctorslot', authlogin, function (req, res) {
+  var getresisterQ = "SELECT *,false as booked FROM doctorappointmentslot WHERE appDrId =" + req.query.appDrId + " AND drAppDate='" + req.query.drAppDate + "'";
   //console.log(getresisterQ);
   con.query(getresisterQ, function (error, result) {
     if (error) {
@@ -1070,20 +1076,22 @@ router.get('/getdoctorslot',authlogin,function(req,res){
       res.send("Unable to get data1");
     }
     else {
-    //  var soltId=
+      //  var soltId=
       // var getothertabel="SELECT appSlotId FROM appointment app WHERE app.appDrId =" + req.body.drId+ " AND app.appSlotId IN ("+req.body.drAppDate+")";
-      var getothertabel="SELECT GROUP_CONCAT( appSlotId) as slotId FROM appointment app WHERE app.appDrId = " + req.query.appDrId+ " AND app.appSlotId IN (SELECT slotId FROM doctorappointmentslot WHERE appDrId =" + req.query.appDrId+ " AND drAppDate='"+req.query.drAppDate+"')";
+      var getothertabel = "SELECT GROUP_CONCAT( appSlotId) as slotId FROM appointment app WHERE app.appDrId = " + req.query.appDrId + " AND app.appSlotId IN (SELECT slotId FROM doctorappointmentslot WHERE appDrId =" + req.query.appDrId + " AND drAppDate='" + req.query.drAppDate + "')";
       //console.log(getothertabel);
-con.query(getothertabel,function(errorInside,resultInside){
-if (errorInside) {
-  console.log(errorInside);
-  res.send("Unable to get data2");
-}
-else {
-console.log(result,resultInside);
-      res.send({"Slots": result,"BookedSlots":resultInside});
-    }   });
-}  });
+      con.query(getothertabel, function (errorInside, resultInside) {
+        if (errorInside) {
+          console.log(errorInside);
+          res.send("Unable to get data2");
+        }
+        else {
+          console.log(result, resultInside);
+          res.send({ "Slots": result, "BookedSlots": resultInside });
+        }
+      });
+    }
+  });
 });
 
 //insert slot

@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const jsonwebtocken=require('jsonwebtoken');
 const bodyParser=require('body-parser');
-
+// const cors=require('cors')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -13,7 +13,6 @@ const router = require('./routes/users');
 // var usersRouter = require('./routes/users');
 
 var app = express();
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -52,6 +51,9 @@ app.use(expressSession({secret: 'your secret', saveUninitialized: true, resave: 
 // error handler
 const cors = require("cors");
 const { error } = require('console');
+const allowedOrigins = ['http://localhost:3002' , 'https://192.68.0.6:3002', 'http://127.0.0.1:3002'];
+const options=cors.CorsOptions= {  origin: allowedOrigins};
+app.use(cors(options));
 app.use(cors({
   origin: '*'
   
@@ -101,4 +103,24 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+
+
+app.use(function (req, res, next) {
+
+  // Website you wish to allow to connect
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8888');
+
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+
+  // Pass to next layer of middleware
+  next();
+});
 module.exports = app;
