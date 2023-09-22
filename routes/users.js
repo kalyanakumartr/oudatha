@@ -287,7 +287,7 @@ router.get('/doctorcategorymap', authlogin, function (req, res) {
 
 //get doctorby category
 router.get('/getDoctorByCategory', authlogin, function (req, res, next) {
-  var getresisterQ = "SELECT u.username as DocName,dcm.docexpreience,dcm.doccertificatenum,dcm.categoryId, dcm.drDesignation,dcm.userId as DocId,cat.categories,u.rating as Rating FROM category cat,doctorcategorymap dcm, user u WHERE cat.catid=dcm.categoryId AND dcm.userId= u.id AND dcm.categoryId=" + req.query.categoryId;
+  var getresisterQ = "SELECT u.username as DocName,dcm.docexpreience,dcm.doccertificatenum,dcm.categoryId, dcm.drDesignation,dcm.userId as DocId,cat.categories,u.rating as rating FROM category cat,doctorcategorymap dcm, user u WHERE cat.catid=dcm.categoryId AND dcm.userId= u.id AND dcm.categoryId=" + req.query.categoryId;
   con.query(getresisterQ, function (error, result) {
     if (error) {
       console.log(error);
