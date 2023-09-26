@@ -785,8 +785,10 @@ router.post('/auth', async function (request, response) {
               if (results[0].roleId == 3) {
 
                 type = "Admin"
+                var appoiid = 0;
+                var statusId = 0;
 
-                response.status(200).send({ accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
+                response.status(200).send({ appId: appoiid, stsId: statusId,accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
                 response.end();
               }
               else if (results[0].roleId == 1) {
@@ -794,7 +796,7 @@ router.post('/auth', async function (request, response) {
                 type = "Doctor"
                 var appoiid = 0;
                 var statusId = 0;
-                response.status(200).send({ appId: appoiid, stsId: statusId, accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
+                response.status(200).send({ appId: appoiid, stsId: statusId,accesstoken: accesstoken, usertype: type, username: results[0].username, userId: results[0].userId, email: results[0].email, phonenumber: results[0].phonenumber, Gender: results[0].gender });
                 response.end();
               }
               else {
